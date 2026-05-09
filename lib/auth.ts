@@ -7,10 +7,7 @@ import { signIn, signOut } from "next-auth/react";
 /**
  * Login utilisateur avec NextAuth Credentials
  */
-export async function login(
-  email: string,
-  password: string
-) {
+export async function login(email: string, password: string) {
   try {
     const response = await signIn("credentials", {
       email,
@@ -18,12 +15,33 @@ export async function login(
       redirect: false,
     });
 
-    return response;
+    if (!response) {
+      return {
+        ok: false as const,
+        error: "Erreur réseau",
+      };
+    }
+
+    if (response.error) {
+      return {
+        ok: false as const,
+        error:
+          response.error === "CredentialsSignin"
+            ? "Email ou mot de passe incorrect"
+            : response.error,
+      };
+    }
+
+    return {
+      ok: true as const,
+      url: response.url,
+    };
   } catch (error) {
     console.error("LOGIN_ERROR", error);
 
     return {
-      error: "Authentication failed",
+      ok: false as const,
+      error: "Connexion impossible",
     };
   }
 }

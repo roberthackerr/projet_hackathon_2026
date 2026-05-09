@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import * as z from "zod";
+
+import { login as loginUser } from "@/lib/auth";
 
 const schema = z.object({
   email: z.string().email(),
@@ -15,7 +18,9 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function LoginForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -26,7 +31,17 @@ export default function LoginForm() {
   });
 
   async function onSubmit(data: FormData) {
-    console.log(data);
+    setServerError(null);
+
+    const result = await loginUser(data.email.trim(), data.password);
+
+    if (result.ok) {
+      router.push("/");
+      router.refresh();
+      return;
+    }
+
+    setServerError(result.error);
   }
 
   return (
@@ -43,6 +58,15 @@ export default function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        {serverError && (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+          >
+            {serverError}
+          </p>
+        )}
 
         {/* EMAIL */}
         <div>
