@@ -11,18 +11,18 @@ import { getDatabase } from "@/lib/mongodb";
 export async function GET() {
   try {
     /**
-     * Connexion MongoDB
+     * MongoDB connection
      */
     const db = await getDatabase();
 
     /**
-     * Collection ais
+     * Collection
      */
     const aisCollection =
       db.collection("ais");
 
     /**
-     * Récupération des IA
+     * Fetch AIs
      */
     const ais = await aisCollection
       .find({})
@@ -66,7 +66,7 @@ export async function GET() {
 
 /**
  * POST /api/ais
- * Ajouter une nouvelle IA
+ * Publier une IA
  */
 export async function POST(req: Request) {
   try {
@@ -79,9 +79,12 @@ export async function POST(req: Request) {
       name,
       description,
       domain,
+      type,
+      image,
       users,
       rating,
       gradient,
+      createdBy,
     } = body;
 
     /**
@@ -106,12 +109,12 @@ export async function POST(req: Request) {
     }
 
     /**
-     * Connexion MongoDB
+     * MongoDB connection
      */
     const db = await getDatabase();
 
     /**
-     * Collection ais
+     * Collection
      */
     const aisCollection =
       db.collection("ais");
@@ -139,28 +142,48 @@ export async function POST(req: Request) {
     }
 
     /**
-     * Insert IA
+     * Create AI document
+     */
+    const newAI = {
+      name,
+
+      description,
+
+      domain,
+
+      type:
+        type || "assistant",
+
+      image:
+        image || null,
+
+      users:
+        users || "0",
+
+      rating:
+        rating || 0,
+
+      gradient:
+        gradient ||
+        "from-cyan-500/20 to-blue-500/20",
+
+      createdBy:
+        createdBy || "Anonymous",
+
+      isPublished: true,
+
+      createdAt: new Date(),
+
+      updatedAt: new Date(),
+    };
+
+    /**
+     * Insert AI
      */
     const result =
-      await aisCollection.insertOne({
-        name,
-
-        description,
-
-        domain,
-
-        users: users || "0",
-
-        rating: rating || 0,
-
-        gradient:
-          gradient ||
-          "from-cyan-500/20 to-blue-500/20",
-
-        createdAt: new Date(),
-
-        updatedAt: new Date(),
-      });
+      await aisCollection.insertOne(
+        newAI
+      );
 
     /**
      * Success response
@@ -170,10 +193,12 @@ export async function POST(req: Request) {
         success: true,
 
         message:
-          "IA ajoutée avec succès",
+          "IA publiée avec succès",
 
         insertedId:
           result.insertedId,
+
+        data: newAI,
       },
       {
         status: 201,
