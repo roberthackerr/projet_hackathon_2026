@@ -1,4 +1,5 @@
 // app/api/ai-chat/route.ts
+
 import {
     NextRequest,
     NextResponse,
@@ -11,7 +12,7 @@ import {
   import { getDatabase } from "@/lib/mongodb";
   
   /**
-   * OpenRouter / OpenAI
+   * OpenRouter
    */
   const openai = new OpenAI({
     baseURL:
@@ -39,33 +40,102 @@ import {
     string
   > = {
     assistant: `
-  Tu es une intelligence artificielle publiée sur MadaAI Hub.
+  Tu es une intelligence artificielle moderne publiée sur MadaAI Hub.
   
-  Tu aides les utilisateurs de manière claire, intelligente et bienveillante.
+  Tu aides les utilisateurs de manière claire, intelligente et professionnelle.
   
   Tu dois :
-  - répondre précisément,
   - expliquer simplement,
-  - être moderne,
   - être utile,
-  - encourager l’apprentissage.
+  - être moderne,
+  - encourager l'apprentissage,
+  - répondre précisément.
   `,
   
-    translator: `
-  Tu es une IA spécialisée en traduction.
+    programming: `
+  Tu es une IA spécialisée en programmation.
   
-  Tu traduis entre :
+  Tu aides avec :
+  - JavaScript
+  - TypeScript
+  - React
+  - Node.js
+  - Python
+  - HTML/CSS
+  
+  Tu expliques étape par étape.
+  `,
+  
+    translation: `
+  Tu es une IA de traduction.
+  
+  Tu traduis :
   - Malagasy
   - Français
   - Anglais
   `,
   
-    educational: `
+    education: `
   Tu es une IA éducative.
   
-  Tu aides les étudiants à comprendre leurs cours étape par étape.
+  Tu aides les étudiants à comprendre leurs cours.
+  `,
+  
+    business: `
+  Tu es une IA business.
+  
+  Tu aides les entrepreneurs et startups.
   `,
   };
+  
+  /**
+   * Detect AI type
+   */
+  function detectSubject(
+    message: string
+  ) {
+    const lower =
+      message.toLowerCase();
+  
+    if (
+      lower.includes(
+        "react"
+      ) ||
+      lower.includes(
+        "javascript"
+      ) ||
+      lower.includes(
+        "python"
+      ) ||
+      lower.includes("code")
+    ) {
+      return "programming";
+    }
+  
+    if (
+      lower.includes(
+        "translate"
+      ) ||
+      lower.includes(
+        "traduction"
+      )
+    ) {
+      return "translation";
+    }
+  
+    if (
+      lower.includes(
+        "business"
+      ) ||
+      lower.includes(
+        "startup"
+      )
+    ) {
+      return "business";
+    }
+  
+    return "assistant";
+  }
   
   /**
    * Save message
@@ -81,10 +151,13 @@ import {
   
     type: "user" | "assistant";
   }) {
-    const db = await getDatabase();
+    const db =
+      await getDatabase();
   
-    return await db
-      .collection("ai_messages")
+    await db
+      .collection(
+        "ai_messages"
+      )
       .insertOne({
         conversationId,
   
@@ -92,7 +165,8 @@ import {
   
         type,
   
-        createdAt: new Date(),
+        createdAt:
+          new Date(),
       });
   }
   
@@ -103,10 +177,13 @@ import {
     conversationId: string,
     limit = 10
   ) {
-    const db = await getDatabase();
+    const db =
+      await getDatabase();
   
     const messages = await db
-      .collection("ai_messages")
+      .collection(
+        "ai_messages"
+      )
       .find({
         conversationId,
       })
@@ -131,10 +208,10 @@ import {
         await request.json();
   
       const {
-        aiId,
         message,
         conversationId,
-        type = "assistant",
+        aiId,
+        subject = "auto",
       } = body;
   
       /**
@@ -160,26 +237,39 @@ import {
       /**
        * Find AI
        */
-      const ai =
-        await db
-          .collection("ais")
-          .findOne({
-            _id: new ObjectId(aiId),
-          });
+      let ai = null;
   
-      if (!ai) {
-        return NextResponse.json(
-          {
-            success: false,
-  
-            message:
-              "IA introuvable",
-          },
-          {
-            status: 404,
-          }
-        );
+      if (aiId) {
+        ai =
+          await db
+            .collection("ais")
+            .findOne({
+              _id:
+                new ObjectId(
+                  aiId
+                ),
+            });
       }
+  
+      /**
+       * Detect subject
+       */
+      const detectedSubject =
+        subject === "auto"
+          ? detectSubject(
+              message
+            )
+          : subject;
+  
+      /**
+       * System prompt
+       */
+      const systemPrompt =
+        SYSTEM_PROMPTS[
+          detectedSubject
+        ] ||
+        SYSTEM_PROMPTS
+          .assistant;
   
       /**
        * Save user message
@@ -198,15 +288,8 @@ import {
       const history =
         await getConversationHistory(
           conversationId,
-          6
+          5
         );
-  
-      /**
-       * System prompt
-       */
-      const systemPrompt =
-        SYSTEM_PROMPTS[type] ||
-        SYSTEM_PROMPTS.assistant;
   
       /**
        * Build messages
@@ -215,17 +298,22 @@ import {
         {
           role: "system" as const,
   
-          content: systemPrompt,
+          content:
+            systemPrompt,
         },
   
-        ...history.map((msg) => ({
-          role:
-            msg.type === "user"
-              ? ("user" as const)
-              : ("assistant" as const),
+        ...history.map(
+          (msg) => ({
+            role:
+              msg.type ===
+              "user"
+                ? ("user" as const)
+                : ("assistant" as const),
   
-          content: msg.content,
-        })),
+            content:
+              msg.content,
+          })
+        ),
   
         {
           role: "user" as const,
@@ -260,14 +348,16 @@ import {
         "Je réfléchis...";
   
       /**
-       * Save assistant response
+       * Save assistant message
        */
       await saveMessage({
         conversationId,
   
-        content: aiResponse,
+        content:
+          aiResponse,
   
-        type: "assistant",
+        type:
+          "assistant",
       });
   
       /**
@@ -276,7 +366,22 @@ import {
       return NextResponse.json({
         success: true,
   
-        response: aiResponse,
+        response: {
+          content:
+            aiResponse,
+  
+          subject:
+            detectedSubject,
+  
+          ai: ai
+            ? {
+                _id: ai._id,
+  
+                name:
+                  ai.name,
+              }
+            : null,
+        },
       });
     } catch (error: any) {
       console.error(
@@ -299,7 +404,7 @@ import {
   }
   
   /**
-   * GET conversation history
+   * GET history
    */
   export async function GET(
     request: NextRequest
@@ -317,9 +422,6 @@ import {
         return NextResponse.json(
           {
             success: false,
-  
-            message:
-              "Conversation ID manquant",
           },
           {
             status: 400,
@@ -351,16 +453,16 @@ import {
       );
     }
   }
+  
+  /**
+   * PUT
+   * Create conversation
+   */
   export async function PUT() {
     try {
-      /**
-       * Database
-       */
-      const db = await getDatabase();
+      const db =
+        await getDatabase();
   
-      /**
-       * Create conversation
-       */
       const result =
         await db
           .collection(
@@ -374,9 +476,6 @@ import {
               new Date(),
           });
   
-      /**
-       * Success
-       */
       return NextResponse.json(
         {
           success: true,
@@ -391,17 +490,11 @@ import {
         }
       );
     } catch (error) {
-      console.error(
-        "CREATE_CONVERSATION_ERROR",
-        error
-      );
+      console.error(error);
   
       return NextResponse.json(
         {
           success: false,
-  
-          message:
-            "Erreur création conversation",
         },
         {
           status: 500,

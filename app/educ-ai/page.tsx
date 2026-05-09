@@ -151,11 +151,12 @@ export default function LearnAIPage() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading || !conversationId) return;
+    const text = input.trim();
+    if (!text || isLoading || !conversationId) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: text,
       type: 'user',
       createdAt: new Date(),
       subject: selectedSubject
@@ -178,9 +179,11 @@ export default function LearnAIPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: input,
+          aiId: 'educ-ai',
+          message: text,
           conversationId,
-          subject: selectedSubject
+          subject: selectedSubject,
+          type: 'educational',
         })
       });
 
@@ -188,12 +191,21 @@ export default function LearnAIPage() {
       setMessages(prev => prev.filter(m => m.id !== 'typing'));
       
       if (data.success) {
+        const raw = data.response;
+        const content =
+          typeof raw === 'string'
+            ? raw
+            : raw?.content ?? '';
+
         const assistantMessage: Message = {
-          id: data.response.messageId || Date.now().toString(),
-          content: data.response.content,
+          id:
+            (typeof raw === 'object' && raw?.messageId) ||
+            Date.now().toString(),
+          content,
           type: 'assistant',
           createdAt: new Date(),
-          subject: data.response.subject
+          subject:
+            typeof raw === 'object' ? raw?.subject : undefined,
         };
         setMessages(prev => [...prev, assistantMessage]);
         
@@ -202,6 +214,12 @@ export default function LearnAIPage() {
           audio.volume = 0.1;
           audio.play().catch(() => {});
         }
+      } else {
+        toast.error(
+          typeof data.message === 'string'
+            ? data.message
+            : 'Réponse invalide du serveur'
+        );
       }
     } catch (error) {
       setMessages(prev => prev.filter(m => m.id !== 'typing'));
