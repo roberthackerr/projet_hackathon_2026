@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,8 @@ import {
   User,
   Shield,
 } from "lucide-react";
+
+import { register as registerUser } from "@/lib/auth";
 
 const schema = z
   .object({
@@ -32,7 +35,9 @@ const schema = z
 type FormData = z.infer<typeof schema>;
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -46,7 +51,25 @@ export default function RegisterForm() {
   });
 
   async function onSubmit(data: FormData) {
-    console.log(data);
+    setServerError(null);
+
+    const result = await registerUser({
+      name: data.name.trim(),
+      email: data.email.trim(),
+      password: data.password,
+      role: data.role,
+    });
+
+    if (result.ok && result.success) {
+      router.push("/login");
+      return;
+    }
+
+    setServerError(
+      typeof result.message === "string"
+        ? result.message
+        : "Une erreur est survenue"
+    );
   }
 
   return (
@@ -66,6 +89,15 @@ export default function RegisterForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-5"
       >
+
+        {serverError && (
+          <p
+            role="alert"
+            className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300"
+          >
+            {serverError}
+          </p>
+        )}
 
         {/* NAME */}
         <div>
