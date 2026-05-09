@@ -239,7 +239,10 @@ import {
        */
       let ai = null;
   
-      if (aiId) {
+      if (
+        aiId &&
+        ObjectId.isValid(aiId)
+      ) {
         ai =
           await db
             .collection("ais")

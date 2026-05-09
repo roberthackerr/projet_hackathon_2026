@@ -335,7 +335,7 @@ export default function LearnAIPage() {
                     </div>
                   </div>
                   <h2 className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                    Nexus IA
+                    MADAAI
                   </h2>
                 </div>
                 <button onClick={() => setIsSidebarOpen(false)} className="p-1 rounded-lg hover:bg-white/10 transition">
@@ -433,18 +433,12 @@ export default function LearnAIPage() {
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                      LEARN AI • Nexus
-                    </h1>
+              
                     <div className="flex items-center gap-2 text-xs">
                       <div className="flex items-center gap-1">
                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                         <span className="text-emerald-400">Actif</span>
                       </div>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-slate-400">Modèle: GPT-4 Turbo</span>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-cyan-400">Latence: 120ms</span>
                     </div>
                   </div>
                 </div>
