@@ -10,6 +10,7 @@ import {
   Bot,
   Loader2,
   Sparkles,
+  Link2,
 } from "lucide-react";
 
 const domains = [
@@ -47,6 +48,8 @@ export default function CreateAIForm() {
       image: "",
 
       createdBy: "",
+
+      link: "",
     });
 
   async function handleSubmit(
@@ -101,16 +104,13 @@ export default function CreateAIForm() {
       onSubmit={handleSubmit}
       className="rounded-[40px] border border-white/10 bg-white/5 p-8 backdrop-blur-2xl"
     >
-
       {/* AI Name */}
       <div className="mb-6">
-
         <label className="mb-3 block text-sm font-medium text-slate-300">
           Nom de l’IA
         </label>
 
         <div className="relative">
-
           <Bot className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
           <input
@@ -132,7 +132,6 @@ export default function CreateAIForm() {
 
       {/* Description */}
       <div className="mb-6">
-
         <label className="mb-3 block text-sm font-medium text-slate-300">
           Description
         </label>
@@ -154,12 +153,36 @@ export default function CreateAIForm() {
         />
       </div>
 
+      {/* AI Link */}
+      <div className="mb-6">
+        <label className="mb-3 block text-sm font-medium text-slate-300">
+          Lien de l’IA
+        </label>
+
+        <div className="relative">
+          <Link2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+
+          <input
+            type="url"
+            required
+            placeholder="https://example.com"
+            value={formData.link}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+
+                link: e.target.value,
+              })
+            }
+            className="h-14 w-full rounded-2xl border border-white/10 bg-[#0F172A]/80 pl-12 pr-4 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
+          />
+        </div>
+      </div>
+
       {/* Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-
         {/* Domain */}
         <div>
-
           <label className="mb-3 block text-sm font-medium text-slate-300">
             Domaine
           </label>
@@ -189,7 +212,6 @@ export default function CreateAIForm() {
 
         {/* Type */}
         <div>
-
           <label className="mb-3 block text-sm font-medium text-slate-300">
             Type IA
           </label>
@@ -219,7 +241,6 @@ export default function CreateAIForm() {
 
       {/* Author */}
       <div className="mt-6">
-
         <label className="mb-3 block text-sm font-medium text-slate-300">
           Développeur
         </label>
@@ -243,7 +264,6 @@ export default function CreateAIForm() {
 
       {/* Image */}
       <div className="mt-6">
-
         <label className="mb-3 block text-sm font-medium text-slate-300">
           Logo / Image URL
         </label>

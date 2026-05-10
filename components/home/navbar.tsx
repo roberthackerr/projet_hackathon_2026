@@ -123,14 +123,18 @@ function AuthActionsDesktop({
         : "/marketplace";
 
   return (
-    <div className="hidden items-center gap-4 lg:flex">
-      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2">
+    <div className="hidden items-center gap-3 lg:flex">
+      <Link
+        href="/profile"
+        className="flex max-w-[220px] items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 transition hover:border-cyan-400/25 hover:bg-white/10"
+        aria-label="Voir mon profil"
+      >
         <UserRound className="size-5 shrink-0 text-cyan-400/90" aria-hidden />
-        <div className="min-w-0">
+        <div className="min-w-0 text-left">
           <p className="truncate text-sm font-medium text-white">{display}</p>
           <p className="text-xs text-slate-500">{roleLabel}</p>
         </div>
-      </div>
+      </Link>
       <Link
         href={exploreHref}
         className="rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:scale-[1.02]"
@@ -240,18 +244,29 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                  <p className="font-medium text-white">
-                    {session?.user?.name?.trim() ||
-                      session?.user?.email ||
-                      "Compte"}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {ROLE_LABELS[
-                      (role ?? "user") as keyof typeof ROLE_LABELS
-                    ] ?? "Utilisateur"}
-                  </p>
-                </div>
+                <Link
+                  href="/profile"
+                  onClick={closeMobile}
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-3 transition hover:border-cyan-400/25 hover:bg-white/10"
+                  aria-label="Voir mon profil"
+                >
+                  <UserRound
+                    className="size-9 shrink-0 text-cyan-400/90"
+                    aria-hidden
+                  />
+                  <div className="min-w-0 text-left">
+                    <p className="font-medium text-white">
+                      {session?.user?.name?.trim() ||
+                        session?.user?.email ||
+                        "Compte"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {ROLE_LABELS[
+                        (role ?? "user") as keyof typeof ROLE_LABELS
+                      ] ?? "Utilisateur"}
+                    </p>
+                  </div>
+                </Link>
                 <Link
                   href={
                     role === "admin"

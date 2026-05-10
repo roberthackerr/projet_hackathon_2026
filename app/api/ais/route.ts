@@ -85,6 +85,7 @@ export async function POST(req: Request) {
       rating,
       gradient,
       createdBy,
+      link,
     } = body;
 
     /**
@@ -93,7 +94,8 @@ export async function POST(req: Request) {
     if (
       !name ||
       !description ||
-      !domain
+      !domain ||
+      !link
     ) {
       return NextResponse.json(
         {
@@ -101,6 +103,25 @@ export async function POST(req: Request) {
 
           message:
             "Tous les champs sont obligatoires",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /**
+     * Validate URL
+     */
+    try {
+      new URL(link);
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+
+          message:
+            "Lien invalide",
         },
         {
           status: 400,
@@ -150,6 +171,8 @@ export async function POST(req: Request) {
       description,
 
       domain,
+
+      link,
 
       type:
         type || "assistant",

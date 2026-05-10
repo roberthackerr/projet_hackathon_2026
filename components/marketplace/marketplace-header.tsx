@@ -17,14 +17,14 @@ export default function MarketplaceHeader() {
 
         {/* Badge */}
         <div className="mb-6 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm text-cyan-300">
-          Malagasy AI Ecosystem
+          Écosystème IA malgache
         </div>
 
         {/* Title */}
         <h1 className="max-w-4xl text-5xl font-bold leading-tight tracking-tight text-white lg:text-7xl">
-          Explore The Future of{" "}
+          Explorez l&apos;avenir de{" "}
           <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            Malagasy AI
+            l&apos;IA malgache
           </span>
         </h1>
 
